@@ -7,7 +7,7 @@ import { Celebration } from "@/components/Celebration";
 import { Milo, MiloCoach, MiloSays, type MiloMood } from "@/components/Milo";
 import { Button, Card, Chip } from "@/components/ui";
 import { difficultyOf, miloLine, type AdaptiveUpdate } from "@/lib/adaptive";
-import { buildLesson } from "@/lib/questions";
+import { answerLine, buildLesson } from "@/lib/questions";
 import { useApp, type LessonResult } from "@/lib/store";
 import { SUBJECTS, type Question, type SubjectId } from "@/lib/types";
 
@@ -299,9 +299,7 @@ export default function LessonPage() {
               Amazing!
             </h2>
             <p className="tnum mt-1 font-rounded text-lg font-extrabold text-ink">
-              {question.prompt.includes("?")
-                ? question.prompt.replace("?", `= ${question.answer}`)
-                : question.answer}
+              {answerLine(question)}
             </p>
             <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-sm font-extrabold text-grass">
               +10 XP

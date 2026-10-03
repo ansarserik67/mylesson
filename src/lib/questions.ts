@@ -397,3 +397,16 @@ export function buildLesson(
 export function optionLabel(question: Question, value: string) {
   return question.prompt.includes("\n") ? value : value;
 }
+
+/**
+ * The line shown after a correct answer.
+ * "7 + 5 = ?" + 12 -> "7 + 5 = 12". Prose prompts (reading, writing) show the
+ * answer on its own rather than repeating the whole sentence.
+ */
+export function answerLine(question: Question) {
+  const isEquation =
+    question.prompt.includes("=") && question.prompt.trim().endsWith("?");
+  if (!isEquation) return question.answer;
+  const left = question.prompt.replace(/\?\s*$/, "").replace(/=\s*$/, "").trim();
+  return `${left} = ${question.answer}`;
+}

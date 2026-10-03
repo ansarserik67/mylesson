@@ -1,6 +1,6 @@
 import { applyAnswer, createAdaptive } from "../src/lib/adaptive";
-import { buildLesson } from "../src/lib/questions";
-import { SUBJECTS } from "../src/lib/types";
+import { answerLine, buildLesson } from "../src/lib/questions";
+import { SUBJECTS, type Question } from "../src/lib/types";
 
 let fail = 0;
 const check = (label: string, got: unknown, want: unknown) => {
@@ -80,6 +80,51 @@ for (const subject of Object.keys(SUBJECTS) as (keyof typeof SUBJECTS)[]) {
 }
 check("every generated question is answerable", bad, 0);
 console.log(`checked ${total} generated questions`);
+
+// The correct-answer line must never render a doubled "= =".
+const mk = (prompt: string, answer: string): Question => ({
+  id: "x",
+  subject: "math",
+  topic: "Addition",
+  difficulty: "Easy",
+  prompt,
+  hint: "",
+  options: [answer],
+  answer,
+  steps: [],
+});
+check(
+  "equation line",
+  answerLine(mk("2 + 5 = ?", "7")),
+  "2 + 5 = 7",
+);
+check(
+  "subtraction line",
+  answerLine(mk("9 - 3 = ?", "6")),
+  "9 - 3 = 6",
+);
+check(
+  "prose line shows answer only",
+  answerLine(mk("Which letter does “Sun” start with?", "S")),
+  "S",
+);
+
+let badLine = 0;
+for (const subject of Object.keys(SUBJECTS) as (keyof typeof SUBJECTS)[]) {
+  for (const topic of SUBJECTS[subject].topics) {
+    for (const level of ["Beginner", "Easy", "Medium", "Hard"] as const) {
+      for (const q of buildLesson(subject, topic, level, 10)) {
+        const line = answerLine(q);
+        const isEq = q.prompt.includes("=") && q.prompt.trim().endsWith("?");
+        if (line.includes("= =") || (isEq && !line.endsWith(`= ${q.answer}`))) {
+          badLine++;
+          console.log("BAD LINE", q.prompt, "->", line);
+        }
+      }
+    }
+  }
+}
+check("no doubled equals in any answer line", badLine, 0);
 
 console.log(fail === 0 ? "ALL CHECKS PASSED" : `${fail} CHECK(S) FAILED`);
 process.exit(fail === 0 ? 0 : 1);
